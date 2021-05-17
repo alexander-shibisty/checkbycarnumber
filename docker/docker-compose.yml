@@ -1,0 +1,30 @@
+version: '3.5'
+
+volumes:
+    elasticsearch:
+        driver: ${VOLUMES_DRIVER}
+
+services:
+    elasticsearch:
+        build:
+          context: ./elasticsearch
+          args:
+            - ELK_VERSION=${ELK_VERSION}
+        volumes:
+          - elasticsearch:/usr/share/elasticsearch/data
+        environment:
+          - cluster.name=${CLUSTER_NAME}-cluster
+          - node.name=${CLUSTER_NAME}-node
+          - bootstrap.memory_lock=true
+          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - cluster.initial_master_nodes=${CLUSTER_NAME}-node
+        ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+          nofile:
+            soft: 65536
+            hard: 65536
+        ports:
+          - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
+          - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
